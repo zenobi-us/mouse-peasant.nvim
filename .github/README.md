@@ -1,6 +1,6 @@
-# AstroNvim User Configuration Example
+# Mouse Heretic
 
-A user configuration template for [AstroNvim](https://github.com/AstroNvim/AstroNvim)
+This is the premier config for the discerning Mouse Heretic seeking to use [AstroNvim](https://github.com/AstroNvim/AstroNvim).
 
 ## 🛠️ Installation
 
@@ -17,16 +17,10 @@ mv ~/.local/share/nvim ~/.local/share/nvim.bak
 git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
 ```
 
-#### Create a new user repository from this template
-
-Press the "Use this template" button above to create a new repository to store your user configuration.
-
-You can also just clone this repository directly if you do not want to track your user configuration in GitHub.
-
-#### Clone the repository
+#### Clone this AstroConfig
 
 ```shell
-git clone https://github.com/<your_user>/<your_repository> ~/.config/nvim/lua/user
+git clone git@github.com:airtonix/mouse-peasant.nvim.git ~/.config/nvim/lua/user
 ```
 
 #### Start Neovim
