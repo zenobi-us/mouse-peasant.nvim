@@ -2,21 +2,15 @@ return {
   -- customize alpha options
   {
     "goolord/alpha-nvim",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "maximilianlloyd/ascii.nvim",
+    },
     opts = function(_, opts)
+      local ascii = require "ascii"
       -- customize the dashboard header
-      opts.section.header.val = {
-        " █████  ███████ ████████ ██████   ██████",
-        "██   ██ ██         ██    ██   ██ ██    ██",
-        "███████ ███████    ██    ██████  ██    ██",
-        "██   ██      ██    ██    ██   ██ ██    ██",
-        "██   ██ ███████    ██    ██   ██  ██████",
-        " ",
-        "    ███    ██ ██    ██ ██ ███    ███",
-        "    ████   ██ ██    ██ ██ ████  ████",
-        "    ██ ██  ██ ██    ██ ██ ██ ████ ██",
-        "    ██  ██ ██  ██  ██  ██ ██  ██  ██",
-        "    ██   ████   ████   ██ ██      ██",
-      }
+      opts.section.header.val = ascii.art.text.doom.MF_DooM_graffiti
+
       return opts
     end,
   },

@@ -168,5 +168,13 @@ return {
     ["<leader>a"] = { name = "Astro" },
     -- resource config without quitting
     ["<leader>ac"] = { "<cmd>luafile $MYVIMRC<CR>", desc = "Resource config" },
+
+    -- astro group
+    ["<leader>gw"] = { name = "Git Worktrees" },
+    -- list worktrees using primagens worktrees plugin
+    ["<leader>gwl"] = {
+      ":lua require('telescope').extensions.git_worktree.git_worktrees()<CR>",
+      desc = "List worktrees"
+    },
   },
 }
