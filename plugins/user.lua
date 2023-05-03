@@ -91,16 +91,4 @@ return {
     run = "cd app && yarn install",
     ft = "markdown",
   },
-
-  {
-    -- worktrees by theprimagen. depends on telescope
-    "ThePrimeagen/git-worktree.nvim",
-    dependencies = {
-      {
-        "nvim-telescope/telescope.nvim",
-        module = "telescope",
-      },
-    },
-    config = function() require("telescope").load_extension "git_worktree" end,
-  },
 }
