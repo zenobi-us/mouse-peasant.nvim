@@ -4,6 +4,12 @@
 -- lower level configuration and more robust one. (which-key will
 -- automatically pick-up stored data by this setting.)
 --
+--
+function close_buffers()
+  local bufs = vim.fn.getbufinfo { buflisted = true }
+  require("astronvim.utils.buffer").close(0)
+  if require("astronvim.utils").is_available "alpha-nvim" and not bufs[2] then require("alpha").start(true) end
+end
 
 return {
   --
@@ -15,6 +21,9 @@ return {
   i = {
     -- Saving
     ["<C-s>"] = { "<esc>:w<cr>a", desc = "Save file", noremap = true },
+    -- close_buffers
+    ["<C-w>"] = { function() close_buffers() end, desc = "Close buffer", noremap = true },
+
     --[[
 
     Editing
@@ -43,26 +52,36 @@ return {
   --
   --[[
 
-  Visual Mode
+  Select Mode
+
+  When ever a selection is made, the following keymaps will be available.
+
+  Things you don't need to handle here:
+
+  - tab indent/unindent: handled by options.opt.selectmode
 
   ]]
-  v = {
-    -- move highlighted lines
-    ["<C-S-Up>"] = { ":m-2<CR>gv=gv", noremap = true, desc = "Move line up" },
-    ["<C-S-Down>"] = { ":m+<CR>gv=gv", noremap = true, desc = "Move line down" },
-    -- pressing up, down, left or right leaves visual mode
-    ["<Down>"] = { "<esc>j", noremap = true, desc = "Move cursor down" },
-    ["<Up>"] = { "<esc>k", noremap = true, desc = "Move cursor up" },
-    ["<Left>"] = { "<esc>h", noremap = true, desc = "Move cursor left" },
-    ["<Right>"] = { "<esc>l", noremap = true, desc = "Move cursor right" },
+  s = {
+    ["<C-w>"] = { function() close_buffers() end, desc = "Close buffer", noremap = true },
+
     --copy and return to insert mode
-    ["<C-c>"] = { "<esc>yy", noremap = true, desc = "Copy line" },
-    -- paste and return to insert mode
-    ["<C-v>"] = { "<esc>pa", noremap = true, desc = "Paste line below" },
-    ["<c-z>"] = { "u", desc = "Undo" },
+    ["<C-c>"] = {
+      "<C-o>yy",
+      noremap = true,
+      desc = "Copy lines",
+    },
+    ["<C-x>"] = {
+      "<C-o>dd",
+      noremap = true,
+      desc = "Cut selection",
+    },
+    ["<C-v>"] = {
+      "<C-o>p",
+      noremap = true,
+      desc = "Paste over selection",
+    },
+    ["<c-z>"] = { "<C-O>u", desc = "Undo" },
     ["<C-S-z>"] = { "<C-r>", desc = "Redo" },
-    -- cut selection
-    ["<C-x>"] = { "<esc>dd", noremap = true, desc = "Cut line" },
   },
   --
   --[[
@@ -84,12 +103,9 @@ return {
       end,
       desc = "Pick to close",
     },
-    -- closes current buffer,
-    ["<C-w>"] = {
-      "<cmd>lua require('astronvim.utils.buffer').close()<cr>",
-      desc = "Close buffer",
-      noremap = true,
-    },
+    -- close_buffers
+    ["<C-w>"] = { function() close_buffers() end, desc = "Close buffer", noremap = true },
+
     ["<leader>v"] = { name = "Windows" },
     -- new vertical split
     ["<leader>vv"] = { "<cmd>vsplit<cr>", desc = "New vertical split" },
@@ -158,6 +174,13 @@ return {
     ["<leader>fsr"] = { "<cmd>lua require('spectre').open_file_search()<cr>", desc = "Search file" },
     ["<leader>fsc"] = { "<cmd>lua require('spectre').open_visual({select_word=true})<cr>", desc = "Search visual" },
     ["<leader>fss"] = { "<cmd>lua require('spectre').open_file_search({select_word=true})<cr>", desc = "Search file" },
+
+    ["<leader>r"] = { group = "Run" },
+    ["<leader>rm"] = { group = "Run Markdown" },
+    -- load markdown preview on leader rmp
+    ["<leader>rmp"] = { "<cmd>MarkdownPreviewToggle<cr>", desc = "Markdown preview" },
+
+    --
     --
     --[[
 

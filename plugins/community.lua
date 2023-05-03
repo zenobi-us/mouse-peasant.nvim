@@ -13,23 +13,16 @@ return {
   { import = "astrocommunity.markdown-and-latex.markdown-preview-nvim" },
 
   -- completions
-  -- {
-  --   -- import the copilot plugin
-  --   -- further customize the options set by the community
-  --   "copilot.lua",
-  --   opts = {
-  --     filetypes = {
-  --       markdown = true,
-  --       lua = true,
-  --     },
-  --     suggestion = {
-  --       keymap = {
-  --         accept = "<tab>",
-  --         next = "<C-right>",
-  --         prev = "<C-left>",
-  --         dismiss = "<C/>",
-  --       },
-  --     },
-  --   },
-  -- },
+  {
+    -- import the copilot plugin
+    -- further customize the options set by the community
+    "copilot.lua",
+    opts = {
+      filetypes = {
+        markdown = true,
+        lua = true,
+        yaml = true,
+      },
+    },
+  },
 }
