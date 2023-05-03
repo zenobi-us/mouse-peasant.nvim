@@ -47,8 +47,8 @@ return {
     },
     -- enable servers that you already have installed without mason
     servers = {
-      -- "jsonls",
-      -- "yamlls",
+      "jsonls",
+      "yamlls",
       -- "pyright"
     },
   },
