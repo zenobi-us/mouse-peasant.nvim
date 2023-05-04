@@ -26,11 +26,12 @@ This is the premier config for the discerning Mouse Heretic seeking to use [Astr
 - `shift + tab`: unindent line or selection
 - `ctrl + space`: autocomplete menu
 
+
 ## TODO
 
 - `ctrl + p`: Work out how to merge `:Telescope keymaps` with `:Telescope :commands`
 - `ctrl + \`: work out how to bind this to AstroNvims comment/uncomment feature
-
+- implement  [MouseMenu](https://neovim.io/doc/user/gui.html#popup-menu) for all the above relevant and more.
 
 
 ## 🛠️ Installation
