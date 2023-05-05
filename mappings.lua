@@ -37,9 +37,11 @@ return {
     -- Undo / Redo
     ["<c-z>"] = { "<C-o>ua", desc = "Undo" },
     ["<C-S-z>"] = { "<C-o><C-r>a", desc = "Redo" },
+
     -- Move line up and down
     ["<C-S-Down>"] = { "<esc>:m+<CR>==gi", noremap = true, desc = "Move line down" },
     ["<C-S-Up>"] = { "<esc>:m-2<CR>==gi", noremap = true, desc = "Move line up" },
+
     -- select all
     ["<C-a>"] = { "<esc>ggVG", noremap = true, desc = "Select all" },
     -- copy
@@ -49,6 +51,7 @@ return {
     --paste
     ["<C-v>"] = { "<esc>p", noremap = true, desc = "Paste line below" },
   },
+
   --
   --[[
 
@@ -62,9 +65,21 @@ return {
 
   ]]
   s = {
+    -- up/down exits select mode
     ["<C-w>"] = { function() close_buffers() end, desc = "Close buffer", noremap = true },
 
-    --copy and return to insert mode
+    -- Move line up and down while keeping selection
+    -- ["<C-S-Up>"] = { "<C-O>:m '<-2<CR>gv", noremap = true, desc = "Move line up" },
+    -- Move line up and down while keeping selection
+    -- ["<C-S-Down>"] = { "<C-O>:m '>+1<CR>gv=gv", noremap = true, desc = "Move line down" },
+
+    ["<C-S-Up>"] = {
+      "<C-O>:MoveBlock(1)<CR>",
+    },
+    ["<C-S-Down>"] = {
+      "<C-O>:MoveBlock(-1)<CR>",
+    },
+
     ["<C-c>"] = {
       "<C-o>yy",
       noremap = true,
@@ -95,6 +110,11 @@ return {
     ["<S-Down>"] = false,
     -- mappings seen under group name "Buffer"
     ["<C-n>"] = { "<cmd>tabnew<cr>", desc = "New tab" },
+
+    ["<leader>e"] = false,
+    -- remap open folder to ctrl + b
+    ["<C-b>"] = { ":Neotree toggle<cr>", desc = "Open folder" },
+
     ["<leader>bD"] = {
       function()
         require("astronvim.utils.status").heirline.buffer_picker(
@@ -129,12 +149,8 @@ return {
     ["<c-X>"] = { '<C-u>call setreg("+", getline(".")) | normal dd<CR>', desc = "Cut line" },
     ["<c-z>"] = { "u", desc = "Undo" },
     ["<C-S-z>"] = { "<C-r>", desc = "Redo" },
-    -- Move line up and down while keeping selection
-    ["<C-S-Up>"] = { ":m-2<CR>gv=gv", noremap = true, desc = "Move line up" },
-    -- Move line up and down while keeping selection
-    ["<C-S-Down>"] = { ":m+<CR>gv=gv", noremap = true, desc = "Move line down" },
-    -- ["<C-S-Up>"] = { ":m-2<CR>==", noremap = true, desc = "Move line up" },
-    -- ["<C-S-Down>"] = { ":m+<CR>==", noremap = true, desc = "Move line down" },
+    ["<C-S-Up>"] = { ":m-2<CR>==", noremap = true, desc = "Move line up" },
+    ["<C-S-Down>"] = { ":m+<CR>==", noremap = true, desc = "Move line down" },
     --
     --[[
 
@@ -191,5 +207,14 @@ return {
     ["<leader>a"] = { name = "Astro" },
     -- resource config without quitting
     ["<leader>ac"] = { "<cmd>luafile $MYVIMRC<CR>", desc = "Resource config" },
+
+    --[[
+    --  Git
+    --]]
+    -- launch lazygit in a floating toggleterminal with the current file as the filter
+    ["<leader>gf"] = {
+      function() require("astronvim.utils").toggle_term_cmd("lazygit --filter=" .. vim.fn.expand "%:p") end,
+      desc = "Git: show file history",
+    },
   },
 }
