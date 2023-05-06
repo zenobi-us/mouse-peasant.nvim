@@ -39,8 +39,8 @@ return {
     ["<C-S-z>"] = { "<cmd>redo<cr>", desc = "Redo" },
 
     -- Move line up and down
-    ["<C-S-Down>"] = { "<cmd>:m+<CR>==gi", noremap = true, desc = "Move line down" },
-    ["<C-S-Up>"] = { "<cmd>:m-2<CR>==gi", noremap = true, desc = "Move line up" },
+    ["<C-S-Down>"] = { "<cmd>:m+<CR>", noremap = true, desc = "Move line down" },
+    ["<C-S-Up>"] = { "<cmd>:m-2<CR>", noremap = true, desc = "Move line up" },
 
     -- select all
     ["<C-a>"] = { "<esc>ggVG", noremap = true, desc = "Select all" },

@@ -85,5 +85,7 @@ return {
       pattern = { "term://*toggleterm#*" },
       callback = function() vim.cmd "startinsert!" end,
     })
+
+    require("user.core.context_menu").setup()
   end,
 }
