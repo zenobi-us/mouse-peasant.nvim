@@ -1,4 +1,44 @@
 local M = {}
+-- these are filetypes and buftypes that are not actual files
+-- created by plugins or by neovim itself
+
+M.uitypes = {
+  "NvimTree",
+  "Nvpunk",
+  "NvpunkHealthcheck",
+  "Outline",
+  "TelescopePrompt",
+  "Trouble",
+  "aerial",
+  "alpha",
+  "dap-repl",
+  "dapui_breakpoints",
+  "dapui_console",
+  "dapui_scopes",
+  "dapui_stacks",
+  "dapui_watches",
+  "dashboard",
+  "help",
+  "lazy",
+  "lir",
+  "neo-tree",
+  "neo-tree-popup",
+  "neogitstatus",
+  "notify",
+  "packer",
+  "qf",
+  "spectre_panel",
+  "startify",
+  "toggleterm",
+  "vim",
+}
+
+M.buftypes = {
+  "nofile",
+  "prompt",
+  "quickfix",
+  "terminal",
+}
 
 --- Checks if current buf has LSPs attached
 ---@return boolean
@@ -8,16 +48,11 @@ M.buf_has_lsp = function()
   })
 end
 
-local nonfile = require "user.core.nonfiles"
-
 --- Checks if current buf is a file
 ---@return boolean
 M.buf_is_file = function()
-  return not vim.tbl_contains(nonfile.filetypes, vim.bo.filetype)
-      and not vim.tbl_contains(nonfile.buftypes, vim.bo.buftype)
+  return not vim.tbl_contains(M.uitypes, vim.bo.filetype) and not vim.tbl_contains(M.buftypes, vim.bo.buftype)
 end
-
-M.buf_is_neotree = function() return vim.bo.filetype == "neo-tree" end
 
 --- Checks if current buf has DAP support
 ---@return boolean
@@ -34,8 +69,6 @@ end
 
 local MODES = { "i", "n" }
 
-M.MENU_ITEM_WIDTH = 32
-
 --- Clear all entries from the given menu
 ---@param menu string
 M.clear_menu = function(menu)
@@ -45,11 +78,36 @@ end
 --- Formats the label of a menu entry to avoid errors
 ---@param label string
 ---@return string
-M.format_menu_label = function(label)
+M.escape_label = function(label)
   local res = string.gsub(label, " ", [[\ ]])
   res = string.gsub(res, "<", [[\<]])
   res = string.gsub(res, ">", [[\>]])
   return res
+end
+
+M.slugify = function(str) return string.gsub(string.lower(str), " ", "_") end
+
+-- Recursively annotate the command of each menu item except if it has menu items
+M.render_label = function(menu, options)
+  -- merge options with defaults
+  -- this is done to avoid having to pass the options table around
+  options = options or {}
+  options.submenu_indicator = options.submenu_indicator or "▸"
+  options.menu_item_width = options.menu_item_width or 30
+
+  -- TODO: workout how to colourise parts of a popup label
+  options.label_colour = options.label_colour or "Normal"
+  options.command_colour = options.command_colour or "Comment"
+
+  local padding = options.menu_item_width - #menu.label
+
+  if menu.items ~= nil and options.submenu_indicator ~= nil then
+    -- we'll add a ▸ to indicate it's a submenu
+    menu.label = menu.label .. string.rep(" ", padding - 2) .. options.submenu_indicator
+    return
+  end
+
+  menu.label = menu.label .. string.rep(" ", padding - #menu.command) .. menu.command
 end
 
 M.render_menu_item = function(menu)
@@ -58,7 +116,7 @@ M.render_menu_item = function(menu)
 
   -- create the menu entry for each mode
   for _, mode in ipairs(MODES) do
-    vim.cmd(mode .. "menu " .. menu.id .. "." .. M.format_menu_label(menu.label) .. " " .. menu.command)
+    vim.cmd(mode .. "menu " .. menu.id .. "." .. M.escape_label(menu.label) .. " " .. menu.command)
   end
 end
 
@@ -82,7 +140,7 @@ end
 
 M.render_menu = function(menu)
   -- clear the popup menu entry
-  M.clear_menu("PopUp." .. M.format_menu_label(menu.id))
+  M.clear_menu("PopUp." .. M.escape_label(menu.label))
 
   if menu.items ~= nil then
     M.render_submenu(menu)
@@ -106,100 +164,34 @@ M.walk_tree = function(menu, func, args)
   end
 end
 
-M.slugify = function(str) return string.gsub(string.lower(str), " ", "_") end
-
-M.annotate_id = function(menu, parent_id)
-  if parent_id == nil then return end
-
-  menu.id = parent_id .. "." .. M.format_menu_label(menu.label)
-end
-
--- Recursively annotate the command of each menu item except if it has menu items
-M.annotate_command = function(menu)
-  local padding = M.MENU_ITEM_WIDTH - #menu.label
-  if menu.items ~= nil then
-    -- we'll add a ▸ to indicate it's a submenu
-    menu.label = menu.label .. string.rep(" ", padding - 2) .. "▸"
-    return
-  end
-
-  menu.label = menu.label .. string.rep(" ", padding - #menu.command) .. "<" .. menu.command .. ">"
-end
-
 -- Create a menu item identified by id. It requires a label and a command.
 -- if it has items then it's a submenu which requires a table of items
 M.menu_item = function(options)
-  M.walk_tree(options, function(item, parent)
-    M.annotate_command(item)
-    M.annotate_id(item, parent and parent.id or nil)
-  end)
-
-  return {
+  local result = {
     id = options.id,
     label = options.label,
     command = options.command or "<Nop>",
     condition = options.condition,
     items = options.items,
   }
+
+  M.walk_tree(result, function(item, parent)
+    M.render_label(item)
+    if parent then item.id = parent.id or item.id end
+  end)
+
+  return result
 end
 
-local MENUS = {}
-MENUS.neotree_newfile = {
-  id = "NeoTreePopUpNewFile",
-  label = "New File",
-  condition = M.buf_is_neotree,
-  command = "a",
-}
-
-MENUS.neotree = M.menu_item {
-  id = "NeoTreePopUp",
-  label = "Files",
-  condition = M.buf_is_neotree,
-  items = {
-    MENUS.neotree_newfile,
-    {
-      label = "New Directory",
-      command = "A",
-    },
-    {
-      label = "Rename",
-      command = "r",
-    },
-    {
-      label = "Delete",
-      command = "D",
-    },
-    {
-      label = "Copy",
-      command = "c",
-    },
-    {
-      label = "Paste",
-      command = "p",
-    },
-    {
-      label = "Open",
-      command = "o",
-    },
-    {
-      label = "Close",
-      command = "q",
-    },
-  },
-}
 M.clear_menu "PopUp"
 
-M.set_keymap = function() require("user.core.keymapper").nkeymap("<A-m>", "<cmd>popup PopUp<cr>", "Open Context Menu") end
-
-M.setup = function()
+M.menu = function(menu)
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function()
       -- attach neotree menu
-      M.render_menu(MENUS.neotree)
+      M.render_menu(menu)
     end,
   })
-
-  M.set_keymap()
 end
 
 return M
