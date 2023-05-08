@@ -35,8 +35,14 @@ return {
     ["<S-Tab>"] = { "<C-d>", desc = "Unindent", noremap = true },
 
     -- Undo / Redo
-    ["<c-z>"] = { "<cmd>undo<cr>", desc = "Undo" },
-    ["<C-S-z>"] = { "<cmd>redo<cr>", desc = "Redo" },
+    ["<c-z>"] = {
+      "<cmd>u<cr>",
+      desc = "Undo",
+    },
+    ["<C-S-z>"] = {
+      "<C-o><C-r>",
+      desc = "Redo",
+    },
 
     -- Move line up and down
     ["<C-S-Down>"] = { "<cmd>:m+<CR>", noremap = true, desc = "Move line down" },
@@ -211,10 +217,63 @@ return {
     --[[
     --  Git
     --]]
-    -- launch lazygit in a floating toggleterminal with the current file as the filter
-    ["<leader>gf"] = {
-      function() require("astronvim.utils").toggle_term_cmd("lazygit --filter=" .. vim.fn.expand "%:p") end,
-      desc = "Git: show file history",
+    ["<leader>gI"] = { name = "Github Issues" },
+    ["<leader>gIl"] = {
+      "<cmd>Octo issue list<cr>",
+      desc = "GitHub: show issue list",
+    },
+    --create issue
+    ["<leader>gIc"] = {
+      "<cmd>Octo issue create<cr>",
+      desc = "GitHub: create issue",
+    },
+    --close issue
+    ["<leader>gIq"] = {
+      "<cmd>Octo issue close<cr>",
+      desc = "GitHub: close issue",
+    },
+    --reopen issue
+    ["<leader>gIo"] = {
+      "<cmd>Octo issue reopen<cr>",
+      desc = "GitHub: reopen issue",
+    },
+
+    -- pull request
+    ["<leader>gP"] = { name = "Github Pull Request" },
+    --list pull request
+    ["<leader>gPl"] = {
+      "<cmd>Octo pr list<cr>",
+      desc = "GitHub: show pull request list",
+    },
+    --create pull request
+    ["<leader>gPc"] = {
+      "<cmd>Octo pr create<cr>",
+      desc = "GitHub: create pull request",
+    },
+    --close pull request
+    ["<leader>gPq"] = {
+      "<cmd>Octo pr close<cr>",
+      desc = "GitHub: close pull request",
+    },
+    --reopen pull request
+    ["<leader>gPo"] = {
+      "<cmd>Octo pr reopen<cr>",
+      desc = "GitHub: reopen pull request",
+    },
+    --merge pull request
+    ["<leader>gPm"] = {
+      "<cmd>Octo pr merge<cr>",
+      desc = "GitHub: merge pull request",
+    },
+    --add comment
+    ["<leader>gPa"] = {
+      "<cmd>Octo comment create<cr>",
+      desc = "GitHub: add comment",
+    },
+    --add reaction
+    ["<leader>gPr"] = {
+      "<cmd>Octo reaction add<cr>",
+      desc = "GitHub: add reaction",
     },
   },
 }
