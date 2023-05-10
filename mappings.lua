@@ -117,7 +117,7 @@ return {
     -- mappings seen under group name "Buffer"
     ["<C-n>"] = { "<cmd>tabnew<cr>", desc = "New tab" },
 
-    ["<leader>e"] = false,
+    -- ["<leader>e"] = false,
     -- remap open folder to ctrl + b
     ["<C-b>"] = { ":Neotree toggle<cr>", desc = "Open folder" },
 
@@ -274,6 +274,14 @@ return {
     ["<leader>gPr"] = {
       "<cmd>Octo reaction add<cr>",
       desc = "GitHub: add reaction",
+    },
+
+    -- Github Gists
+    ["<leader>gG"] = { name = "Github Gists" },
+    --list gists
+    ["<leader>gGl"] = {
+      "<cmd>Octo gist list<cr>",
+      desc = "GitHub: show gists list",
     },
   },
 }
