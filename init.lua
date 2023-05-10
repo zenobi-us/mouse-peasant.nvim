@@ -17,7 +17,7 @@ return {
     },
   },
   -- Set colorscheme to use
-  colorscheme = "rose-pine",
+  colorscheme = "github_dark_dimmed",
   -- diagnostics configuration (for vim.diagnostics.config({...})) when diagnostics are on
   diagnostics = {
     virtual_text = true,
@@ -82,10 +82,10 @@ return {
   -- anything that doesn't fit in the normal config locations above can go here
   polish = function()
     -- set up custom filetypes
+
     -- vim.filetype.add {
     --   extension = {
     --     foo = "fooscript",
-    --   },
     --   filename = {
     --     ["foofile"] = "fooscript",
     --   },
@@ -93,13 +93,10 @@ return {
     --     ["~/%.config/foo/.*"] = "fooscript",
     --   },
     -- }
-
-    vim.api.nvim_create_autocmd({
-      "BufEnter",
-    }, {
-      pattern = { "toggleterm" },
-      callback = function() vim.cmd "startinsert!" end,
-    })
+    --
+    vim.api.nvim_command "augroup terminal_setup | au!"
+    vim.api.nvim_command "autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i"
+    vim.api.nvim_command "augroup end"
 
     require("user.menus.neotree").setup()
   end,
