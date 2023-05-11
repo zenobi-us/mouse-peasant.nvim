@@ -63,11 +63,10 @@ return {
     -- toggleterm.nvim
     "akinsho/toggleterm.nvim",
     opts = {
-      open_mapping = "<c-\\>",
       hide_numbers = true,
       -- these two options will force the terminal to always be in insert mode
       start_in_insert = true,
-      persist_mode = false,
+      persist_mode = true,
     },
   },
 
