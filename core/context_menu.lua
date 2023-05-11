@@ -53,6 +53,24 @@ local BUF_TYPES = {
   "terminal",
 }
 
+---@class MenuItem
+---@field id string
+---@field label string
+---@field command string
+---@field condition function
+---@field items MenuItem[] | nil
+---@field options MenuLabelOptions | nil
+local MenuItem = {}
+
+---@class MenuLabelOptions
+---@field menu_item_width number
+---@field minimum_gap_width number
+---@field submenu_indicator string
+---@field label_colour string
+---@field command_colour string
+---@field parent MenuItem | nil
+local MenuLabelOptions = {}
+
 M.DEFAULTS = {
   menu_item_width = 30,
   minimum_gap_width = 4,
@@ -94,41 +112,44 @@ local escape_label = function(label)
   return res
 end
 
-M.slugify = function(str) return string.gsub(string.lower(str), " ", "_") end
+local Walk = {}
 
-M.walk_tree = function(menu, func, args)
+Walk.tree = function(menu, func, args)
   func(menu, args and args.parent or nil)
 
   if menu.items then
     for _, item in ipairs(menu.items) do
-      M.walk_tree(item, func, { parent = menu })
+      Walk.tree(item, func, { parent = menu })
     end
   end
 end
 
 -- Recursively annotate the command of each menu item except if it has menu items
-M.menu_label = function(menu, options)
+---@param menu MenuItem
+---@param options MenuLabelOptions | nil
+---@return string
+local menu_label = function(menu, options)
   -- merge options with defaults
   -- this is done to avoid having to pass the options table around
-  options = vim.tbl_extend("force", M.DEFAULTS, options or {})
+  options = vim.tbl_extend("force", DEFAULTS, options or {})
 
   local padding = options.menu_item_width - #menu.label
   if padding < options.minimum_gap_width then padding = options.minimum_gap_width end
 
   if menu.items ~= nil and options.submenu_indicator ~= nil then
     -- we'll add a ▸ to indicate it's a submenu
-    return menu.label
-    -- .. string.rep(" ", padding - 2) .. options.submenu_indicator
+    return menu.label .. string.rep(" ", padding - 2) .. options.submenu_indicator
   end
 
   if menu.command == "<Nop>" or menu.command == nil then return menu.label end
 
-  return menu.label .. " " .. menu.command
-
-  -- .. string.rep(" ", padding) .. item.command
+  return menu.label .. string.rep(" ", padding) .. menu.command
 end
 
-M.render_menu_item = function(menu)
+-- Renders a menu item
+---@param menu MenuItem
+---@return nil
+local render_menu_item = function(menu)
   -- bail out of rendering it anew, if there's a condition and it's not met
   if menu.condition ~= nil and not menu.condition() then return end
 
@@ -138,7 +159,7 @@ M.render_menu_item = function(menu)
   end
 end
 
---- Renders a menu
+-- Renders a menu
 ---@param menu MenuItem
 ---@return nil
 local render_menu = function(menu)
@@ -161,22 +182,9 @@ local render_menu = function(menu)
   }
 end
 
-local Walk = {}
-
-  if menu.items ~= nil then
-    M.render_submenu(menu)
-  else
-    M.render_menu_item {
-      id = "PopUp",
-      label = menu.label,
-      command = menu.command,
-      condition = menu.condition,
-    }
-  end
-end
-
 -- Create a menu item identified by id. It requires a label and a command.
 -- if it has items then it's a submenu which requires a table of items
+---@param definition MenuItem
 M.menu_item = function(definition)
   local result = {
     id = definition.id,
@@ -187,14 +195,14 @@ M.menu_item = function(definition)
     options = definition.options,
   }
 
-  M.walk_tree(result, function(item, parent)
+  Walk.tree(result, function(item, parent)
     -- inherit options from parent
     if parent then
       item.id = parent.id or item.id
       item.options = item.options or parent.options
     end
     -- prepare the label once
-    item.label = M.menu_label(item)
+    item.label = menu_label(item)
   end)
 
   return result
@@ -203,6 +211,8 @@ end
 clear_menu "PopUp"
 
 -- accept a list of menu definitions and register them as autocmds
+---@vararg MenuItem | MenuItem[]
+---@return nil
 M.menu = function(...)
   local menus = { ... }
 
@@ -210,12 +220,13 @@ M.menu = function(...)
     -- recursively walk the menu tree and format the labels
     Walk.tree(menu, function(item) menu_label(item) end)
   end
+
   -- create an autocommand to render the menu
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function()
       for _, menu in ipairs(menus) do
         -- attach neotree menu(s)
-        M.render_menu(menu)
+        render_menu(menu)
       end
     end,
   })
