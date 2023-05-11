@@ -138,6 +138,9 @@ M.render_menu_item = function(menu)
   end
 end
 
+--- Renders a menu
+---@param menu MenuItem
+---@return nil
 local render_menu = function(menu)
   -- if it's an entry to a submenu, clear the submenu first
   clear_menu(menu.id)
@@ -145,8 +148,10 @@ local render_menu = function(menu)
   -- bail out of rendering it anew, if there's a condition and it's not me
   if menu.condition ~= nil and not menu.condition() then return end
 
-  for _, item in ipairs(menu.items) do
-    render_menu_item(item)
+  if menu.items ~= nil then
+    for _, item in ipairs(menu.items) do
+      render_menu_item(item)
+    end
   end
 
   render_menu_item {
@@ -201,6 +206,11 @@ clear_menu "PopUp"
 M.menu = function(...)
   local menus = { ... }
 
+  for _, menu in ipairs(arg) do
+    -- recursively walk the menu tree and format the labels
+    Walk.tree(menu, function(item) menu_label(item) end)
+  end
+  -- create an autocommand to render the menu
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function()
       for _, menu in ipairs(menus) do
