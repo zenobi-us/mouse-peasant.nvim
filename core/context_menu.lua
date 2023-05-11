@@ -53,6 +53,24 @@ local BUF_TYPES = {
   "terminal",
 }
 
+---@class MenuOptions
+---@field mode string
+---@field menu string
+---@field width number
+---@field indicator string
+---@field label_colour string
+---@field command_colour string
+local MenuOptions = {}
+
+---@class MenuItem
+---@field id string
+---@field label string
+---@field command string
+---@field condition function
+---@field items MenuItem[]
+---@field parent MenuItem
+local MenuItem = {}
+
 --- Checks if current buf has LSPs attached
 ---@return boolean
 M.buf_has_lsp = function()
@@ -87,6 +105,10 @@ local escape_label = function(label)
   return res
 end
 
+--- Formats the label of a menu entry
+---@param menu MenuItem
+---@param options MenuOptions | nil
+---@return nil
 local menu_label = function(menu, options)
   -- merge options with defaults
   -- this is done to avoid having to pass the options table around
@@ -103,6 +125,9 @@ local menu_label = function(menu, options)
   menu.label = menu.label .. string.rep(" ", padding - #menu.command) .. menu.command
 end
 
+--- Renders a menu item
+---@param menu MenuItem
+---@return nil
 local render_menu_item = function(menu)
   -- bail out of rendering it anew, if there's a condition and it's not me
   if menu.condition ~= nil and not menu.condition() then return end
@@ -113,6 +138,9 @@ local render_menu_item = function(menu)
   end
 end
 
+--- Renders a menu
+---@param menu MenuItem
+---@return nil
 local render_menu = function(menu)
   -- if it's an entry to a submenu, clear the submenu first
   clear_menu(menu.id)
@@ -120,8 +148,10 @@ local render_menu = function(menu)
   -- bail out of rendering it anew, if there's a condition and it's not me
   if menu.condition ~= nil and not menu.condition() then return end
 
-  for _, item in ipairs(menu.items) do
-    render_menu_item(item)
+  if menu.items ~= nil then
+    for _, item in ipairs(menu.items) do
+      render_menu_item(item)
+    end
   end
 
   render_menu_item {
@@ -133,6 +163,14 @@ end
 
 local Walk = {}
 
+---@class MenuTreeWalkArgs
+---@field parent MenuItem
+
+--- recursively walk a menu tree and run a callback on each item.
+-- the callback receives the item and its parent
+---@param menu MenuItem
+---@param func function
+---@param args MenuTreeWalkArgs | nil
 Walk.tree = function(menu, func, args)
   func(menu, args and args.parent or nil)
 
@@ -163,29 +201,38 @@ end
 
 clear_menu "PopUp"
 
-M.menu = function(menu)
-  Walk.tree(menu, function(item) menu_label(item) end)
+-- accepts a varidic number of menu items
+---@vararg MenuItem
+---@return nil
+M.menu = function(...)
+  -- loop through the menu items
 
+  for _, menu in ipairs(arg) do
+    -- recursively walk the menu tree and format the labels
+    Walk.tree(menu, function(item) menu_label(item) end)
+  end
+  -- create an autocommand to render the menu
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function()
-      -- recursively walk the menu tree and format the labels
+      -- loop through the menu items
+      for _, menu in ipairs(arg) do
+        -- clear the popup menu entry
+        clear_menu("PopUp." .. escape_label(menu.label))
 
-      -- clear the popup menu entry
-      clear_menu("PopUp." .. escape_label(menu.label))
+        if menu.items ~= nil then
+          render_menu(menu)
+        else
+          render_menu_item {
+            id = "PopUp",
+            label = menu.label,
+            command = menu.command,
+            condition = menu.condition,
+          }
+        end
 
-      if menu.items ~= nil then
+        -- attach neotree menu
         render_menu(menu)
-      else
-        render_menu_item {
-          id = "PopUp",
-          label = menu.label,
-          command = menu.command,
-          condition = menu.condition,
-        }
       end
-
-      -- attach neotree menu
-      render_menu(menu)
     end,
   })
 end
