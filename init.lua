@@ -99,6 +99,5 @@ return {
     vim.api.nvim_command "augroup end"
 
     require("user.menus.neotree").setup()
-    require("user.menus.git").setup()
   end,
 }
