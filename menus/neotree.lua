@@ -50,7 +50,7 @@ M.neotree = {
 
   close = popup.menu_item {
     label = "Close",
-    condition = M.buf_is_neotree,
+    -- condition = M.buf_is_neotree,
     command = "q",
   },
 }
@@ -58,7 +58,7 @@ M.neotree = {
 M.neotree.popup = popup.menu_item {
   id = "NeoTreePopUp",
   label = "Files",
-  condition = M.buf_is_neotree,
+  -- condition = M.buf_is_neotree,
   items = {
     M.neotree.newfile,
     M.neotree.new_dir,
@@ -71,6 +71,6 @@ M.neotree.popup = popup.menu_item {
   },
 }
 
-M.setup = function() popup.menu(M.neotree.popup) end
+M.setup = function() popup.menu(M.neotree.newfile, M.neotree.new_dir, M.neotree.rename, M.neotree.popup) end
 
 return M

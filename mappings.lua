@@ -35,8 +35,8 @@ return {
     ["<S-Tab>"] = { "<C-d>", desc = "Unindent", noremap = true },
 
     -- Undo / Redo
-    ["<c-z>"] = { "<cmd>undo<cr>", desc = "Undo" },
-    ["<C-S-z>"] = { "<cmd>redo<cr>", desc = "Redo" },
+    ["<C-z>"] = { "<cmd>undo<CR>", desc = "Undo" },
+    ["<C-S-z>"] = { "<cmd>redo<CR>", desc = "Redo" },
 
     -- Move line up and down
     ["<C-S-Down>"] = { "<cmd>:m+<CR>", noremap = true, desc = "Move line down" },
@@ -111,7 +111,6 @@ return {
     -- mappings seen under group name "Buffer"
     ["<C-n>"] = { "<cmd>tabnew<cr>", desc = "New tab" },
 
-    ["<leader>e"] = false,
     -- remap open folder to ctrl + b
     ["<C-b>"] = { ":Neotree toggle<cr>", desc = "Open folder" },
 
@@ -216,5 +215,18 @@ return {
       function() require("astronvim.utils").toggle_term_cmd("lazygit --filter=" .. vim.fn.expand "%:p") end,
       desc = "Git: show file history",
     },
+    ["<leader>o"] = { name = "Github" },
+    ["<leader>oa"] = { ":Octo actions<cr>", desc = "Github commands" },
+
+    ["<leader>oi"] = { name = "Issues" },
+    ["<leader>oil"] = { ":Octo issue list<cr>", desc = "list issues" },
+    ["<leader>ois"] = { ":Octo issue list<cr>", desc = "search issues" },
+
+    ["<leader>op"] = { name = "Pull Requests" },
+    ["<leader>opl"] = { ":Octo pr list<cr>", desc = "list prs" },
+    ["<leader>opc"] = { ":Octo pr create<cr>", desc = "create prs" },
+
+    ["<leader>og"] = { name = "Gists" },
+    ["<leader>ogl"] = { ":Octo gist list<cr>", desc = "list gists" },
   },
 }

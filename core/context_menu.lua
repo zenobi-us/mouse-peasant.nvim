@@ -40,6 +40,13 @@ M.buftypes = {
   "terminal",
 }
 
+M.DEFAULTS = {
+  menu_item_width = 30,
+  minimum_gap_width = 4,
+  submenu_indicator = "😁",
+  label_colour = "Normal",
+  command_colour = "Comment",
+}
 --- Checks if current buf has LSPs attached
 ---@return boolean
 M.buf_has_lsp = function()
@@ -87,31 +94,40 @@ end
 
 M.slugify = function(str) return string.gsub(string.lower(str), " ", "_") end
 
+M.walk_tree = function(menu, func, args)
+  func(menu, args and args.parent or nil)
+
+  if menu.items then
+    for _, item in ipairs(menu.items) do
+      M.walk_tree(item, func, { parent = menu })
+    end
+  end
+end
+
 -- Recursively annotate the command of each menu item except if it has menu items
-M.render_label = function(menu, options)
+M.menu_label = function(menu, options)
   -- merge options with defaults
   -- this is done to avoid having to pass the options table around
-  options = options or {}
-  options.submenu_indicator = options.submenu_indicator or "▸"
-  options.menu_item_width = options.menu_item_width or 30
-
-  -- TODO: workout how to colourise parts of a popup label
-  options.label_colour = options.label_colour or "Normal"
-  options.command_colour = options.command_colour or "Comment"
+  options = vim.tbl_extend("force", M.DEFAULTS, options or {})
 
   local padding = options.menu_item_width - #menu.label
+  if padding < options.minimum_gap_width then padding = options.minimum_gap_width end
 
   if menu.items ~= nil and options.submenu_indicator ~= nil then
     -- we'll add a ▸ to indicate it's a submenu
-    menu.label = menu.label .. string.rep(" ", padding - 2) .. options.submenu_indicator
-    return
+    return menu.label
+    -- .. string.rep(" ", padding - 2) .. options.submenu_indicator
   end
 
-  menu.label = menu.label .. string.rep(" ", padding - #menu.command) .. menu.command
+  if menu.command == "<Nop>" or menu.command == nil then return menu.label end
+
+  return menu.label .. " " .. menu.command
+
+  -- .. string.rep(" ", padding) .. item.command
 end
 
 M.render_menu_item = function(menu)
-  -- bail out of rendering it anew, if there's a condition and it's not me
+  -- bail out of rendering it anew, if there's a condition and it's not met
   if menu.condition ~= nil and not menu.condition() then return end
 
   -- create the menu entry for each mode
@@ -154,30 +170,26 @@ M.render_menu = function(menu)
   end
 end
 
-M.walk_tree = function(menu, func, args)
-  func(menu, args and args.parent or nil)
-
-  if menu.items then
-    for _, item in ipairs(menu.items) do
-      M.walk_tree(item, func, { parent = menu })
-    end
-  end
-end
-
 -- Create a menu item identified by id. It requires a label and a command.
 -- if it has items then it's a submenu which requires a table of items
-M.menu_item = function(options)
+M.menu_item = function(definition)
   local result = {
-    id = options.id,
-    label = options.label,
-    command = options.command or "<Nop>",
-    condition = options.condition,
-    items = options.items,
+    id = definition.id,
+    label = definition.label,
+    command = definition.command or "<Nop>",
+    condition = definition.condition,
+    items = definition.items,
+    options = definition.options,
   }
 
   M.walk_tree(result, function(item, parent)
-    M.render_label(item)
-    if parent then item.id = parent.id or item.id end
+    -- inherit options from parent
+    if parent then
+      item.id = parent.id or item.id
+      item.options = item.options or parent.options
+    end
+    -- prepare the label once
+    item.label = M.menu_label(item)
   end)
 
   return result
@@ -185,11 +197,16 @@ end
 
 M.clear_menu "PopUp"
 
-M.menu = function(menu)
+-- accept a list of menu definitions and register them as autocmds
+M.menu = function(...)
+  local menus = { ... }
+
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function()
-      -- attach neotree menu
-      M.render_menu(menu)
+      for _, menu in ipairs(menus) do
+        -- attach neotree menu(s)
+        M.render_menu(menu)
+      end
     end,
   })
 end
