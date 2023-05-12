@@ -13,4 +13,15 @@ return {
   --     }
   --   end,
   -- },
+  {
+    "VidocqH/lsp-lens.nvim",
+    event = "BufRead",
+    opts = {
+      sections = {
+        definitions = false,
+        references = true,
+        implementation = false,
+      },
+    },
+  },
 }
