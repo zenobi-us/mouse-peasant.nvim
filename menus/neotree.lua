@@ -63,15 +63,21 @@ M.setup = function()
     condition = buf_is_neotree,
     command = "a",
   }, {
-    label = "Something",
+    label = "Delete",
     condition = buf_is_neotree,
-    items = {
-      {
-        label = "Else",
-        condition = buf_is_neotree,
-        command = "a",
-      },
-    },
+    command = "d",
+  }, {
+    label = "Rename",
+    condition = buf_is_neotree,
+    command = "r",
+  }, {
+    label = "Copy",
+    condition = buf_is_neotree,
+    command = "c",
+  }, {
+    label = "Paste",
+    condition = buf_is_neotree,
+    command = "p",
   })
 end
 

@@ -38,4 +38,7 @@ return {
   --     "yaml",
   --   },
   -- },
+
+  -- playground
+  { "nvim-treesitter/playground", event = "VeryLazy", command = "TSPlaygroundToggle" },
 }

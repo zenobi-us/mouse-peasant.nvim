@@ -1,6 +1,19 @@
 local Constants = require "user.core.popup.constants"
 local P = {}
 
+--- Check if the current buf has TreeSitter support
+---@return boolean
+P.buf_has_treesitter = function()
+  local buffer = vim.api.nvim_get_current_buf()
+  local filetype = vim.bo.filetype
+
+  if not P.buf_is_file() then return false end
+  if vim.treesitter.language.get_lang(filetype) == nil then return false end
+  local ok, parser = pcall(vim.treesitter.get_parser, buffer)
+
+  return ok and parser ~= nil
+end
+
 --- Checks if current buf has LSPs attached
 ---@return boolean
 P.buf_has_lsp = function()

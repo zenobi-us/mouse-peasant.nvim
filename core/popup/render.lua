@@ -22,8 +22,13 @@ end
 R.slugify = function(label) return string.gsub(label, "[^%w%s]", ""):gsub("%s+", "_") end
 
 R.label = function(item)
-  local options = Constants.DEFAULTS
-  local width = options.menu_item_width
+  --merge with R.DEFAULTS if not nil
+  local options = vim.tbl_extend("force", Constants.DEFAULTS, item.options or {})
+
+  local width = options.min_menu_item_width
+
+  -- do we show the command in the menu?
+  local show_help = options.show_help or false
 
   -- calculate the padding from the original text of the label
   local padding = width - #item.label
@@ -37,7 +42,16 @@ R.label = function(item)
 
   if item.command == "<Nop>" or item.command == nil then return item.label .. string.rep(" ", padding) end
 
-  return item.label .. string.rep(" ", padding - #item.command) .. item.command
+  return item.label .. string.rep(" ", padding - #item.command) .. (show_help and item.command or "")
+end
+
+-- should the menu item render or not
+R.should_menu_item_display = function(menu)
+  -- if menu has a condition and it's a function,
+  -- bail out of rendering it anew,
+  -- and just return the menu as is
+  if menu.condition ~= nil and type(menu.condition) == "function" then return menu.condition() end
+  return true
 end
 
 -- Create a menu item
@@ -55,18 +69,19 @@ end
 -- They're the ones that have the label of the submenu, and are the ones that have the
 -- command that does something.
 
-R.menu_action = function(menu, modes)
-  -- bail out of rendering it anew, if there's a condition and it's not met
-  if menu.condition ~= nil and not menu.condition() then return end
+R.menu_action = function(menu)
+  if not R.should_menu_item_display(menu) then return end
 
   -- create the menu entry for each mode
-  for _, mode in ipairs(modes or Constants.MODES) do
+  for _, mode in ipairs(menu.modes or Constants.MODES) do
     local cmd = mode .. "menu " .. menu.groupid .. "." .. R.escape_label(R.label(menu)) .. " " .. menu.command
     vim.cmd(cmd)
   end
 end
 
 R.menu_popup = function(menu)
+  if not R.should_menu_item_display(menu) then return end
+
   -- generate a popup id
   local popupId = R.slugify(menu.label)
 
@@ -77,8 +92,20 @@ R.menu_popup = function(menu)
   for _, item in ipairs(menu.items) do
     -- anchor all children to this popupid
     item.groupid = popupId
+    -- merge with parent options
+    item.options = vim.tbl_extend("force", menu.options or {}, item.options or {})
     -- fork to decide if it's a submenu or a menu item
     R.menu_item(item)
+  end
+end
+
+R.menu_separator = function(menu)
+  if not R.should_menu_item_display(menu) then return end
+
+  -- create the menu entry for each mode
+  for _, mode in ipairs(menu.modes or Constants.MODES) do
+    local cmd = mode .. "menu " .. menu.groupid .. ".-1- <Nop>"
+    vim.cmd(cmd)
   end
 end
 
@@ -92,11 +119,18 @@ end
 
 -- Main entry point
 -- all items here are children of the initial "PopUp" menu
-R.menu = function(...)
-  local menus = { ... }
+-- @param options table
+-- @param options.events table
+-- @param options.menus table
+R.menu = function(options)
+  options = options or {}
+  local events = options.events or { "BufEnter" }
+  local menus = options.menus or {}
 
-  vim.api.nvim_create_autocmd({ "BufEnter" }, {
+  vim.api.nvim_create_autocmd(events, {
     callback = function()
+      R.clear_menu "PopUp"
+
       for _, menu in ipairs(menus) do
         menu.groupid = "PopUp"
         R.menu_item(menu)

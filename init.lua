@@ -98,6 +98,7 @@ return {
     vim.api.nvim_command "autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i"
     vim.api.nvim_command "augroup end"
 
-    require("user.menus.neotree").setup()
+    -- load the user.menus files
+    require("user.menus").setup()
   end,
 }

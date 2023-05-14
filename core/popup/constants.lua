@@ -2,7 +2,7 @@ local M = {}
 
 M.DEFAULTS = {
   -- the width of the menu item
-  menu_item_width = 30,
+  min_menu_item_width = 30,
   -- the indicator to show if a menu item has a submenu
   submenu_indicator = "▸",
   -- the colour of the label
