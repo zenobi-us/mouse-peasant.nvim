@@ -58,7 +58,7 @@ local buf_is_neotree = function() return vim.bo.filetype == "neo-tree" end
 -- }
 
 M.setup = function()
-  popup.render.menu({
+  popup.register({
     label = "New File",
     condition = buf_is_neotree,
     command = "a",
