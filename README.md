@@ -8,8 +8,7 @@
 >
 > \- Confucious probably
 
-This is the premier config for the discerning Mouse Heretic seeking to use [AstroNvim![Uploading mouse-peasant.png…]()
-](https://github.com/AstroNvim/AstroNvim).
+This is the premier config for the discerning Mouse Heretic seeking to use [AstroNvim!](https://github.com/AstroNvim/AstroNvim).
 
 ## Goals
 
