@@ -1,10 +1,15 @@
+<p align="center">
+  <img src="https://github.com/airtonix/mouse-peasant.nvim/assets/61225/a180dce7-1ec6-43cb-bfef-4fc500740168" />
+</p>
+
 # Mouse Peasant
 
 > Some haiku about using the mouse
 >
-> \- Confucious probbaly
+> \- Confucious probably
 
-This is the premier config for the discerning Mouse Heretic seeking to use [AstroNvim](https://github.com/AstroNvim/AstroNvim).
+This is the premier config for the discerning Mouse Heretic seeking to use [AstroNvim![Uploading mouse-peasant.png…]()
+](https://github.com/AstroNvim/AstroNvim).
 
 ## Goals
 
